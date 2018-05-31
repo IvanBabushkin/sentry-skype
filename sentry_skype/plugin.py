@@ -1,11 +1,10 @@
 # coding: utf-8
-import logging
+import logging, json, requests
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from sentry.plugins.bases import notify
-from sentry.http import safe_urlopen
 from sentry.utils.safe import safe_execute
 
 from . import __version__, __doc__ as package_doc
@@ -120,19 +119,27 @@ class SkypeNotificationsPlugin(notify.NotificationPlugin):
             return []
         return filter(bool, receivers.strip().splitlines())
 
+    def get_access_token(self, api_id, api_secret):
+        self.logger.debug('Get Skype token')
+        payload = {
+            'client_id': api_id,
+            'client_secret': api_secret,
+            'scope': 'https://api.botframework.com/.default',
+            'grant_type': 'client_credentials'
+        }
+        r = requests.post("https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token", data=payload, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        try:
+            response = json.loads(r.text)
+            return response['access_token']
+        except:
+            return False
+
     def send_message(self, message, receiver, api_id, api_secret):
         url = 'https://apis.skype.com/v2/conversations/' + receiver + '/activities'
-        token = self.get_access_token(client_id=api_id, client_secret=api_secret)
-        headers = {'Authorization': 'Bearer ' + token}
-        payload = {'message': {'content': message}}
-        self.logger.debug('Sending message to %s ' % receiver)
-        response = safe_urlopen(
-            method='POST',
-            headers=headers,
-            url=url,
-            json=payload,
-        )
-        self.logger.debug('Response code: %s, content: %s' % (response.status_code, response.content))
+        token = self.get_access_token(api_id=api_id, api_secret=api_secret)
+        headers = dict(Authorization='Bearer ' + token)
+        data = json.dumps(dict(message=dict(content=message))).encode()
+        requests.post(url, headers=headers, data=data)
 
 
     def notify_users(self, group, event, fail_silently=False):
