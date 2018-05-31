@@ -1,11 +1,11 @@
 # coding: utf-8
 """
-Plugin for Sentry which allows sending notification via Telegram messenger.
+Plugin for Sentry which allows sending notification via Skype messenger.
 """
 from django.conf import settings
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 if settings.configured:
