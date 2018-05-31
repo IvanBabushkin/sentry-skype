@@ -8,7 +8,7 @@ import sentry_skype
 setup(
     name='sentry_skype',
     version=sentry_skype.__version__,
-    packages=['sentry_telegram'],
+    packages=['sentry_skype'],
     url='https://github.com/IvanBabushkin/sentry-skype',
     author='Ivan Babushkin',
     author_email='',
