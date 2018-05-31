@@ -11,7 +11,7 @@ from sentry.utils.safe import safe_execute
 from . import __version__, __doc__ as package_doc
 
 
-class TelegramNotificationsOptionsForm(notify.NotificationConfigurationForm):
+class SkypeNotificationsOptionsForm(notify.NotificationConfigurationForm):
     api_id = forms.CharField(
         label=_('BotAPI id'),
         widget=forms.TextInput(attrs={'placeholder': ''}),
@@ -41,18 +41,18 @@ class SkypeNotificationsPlugin(notify.NotificationPlugin):
     description = package_doc
     version = __version__
     author = 'Ivan Babushkin'
-    author_url = 'https://github.com'
+    author_url = 'https://github.com/IvanBabushkin/sentry-skype'
     resource_links = [
-        ('Bug Tracker', 'https://github.com//issues'),
-        ('Source', 'https://github.com'),
+        ('Bug Tracker', 'https://github.com/IvanBabushkin/sentry-skype/issues'),
+        ('Source', 'https://github.com/IvanBabushkin/sentry-skype'),
     ]
 
     conf_key = 'sentry_skype'
     conf_title = title
 
-    project_conf_form = TelegramNotificationsOptionsForm
+    project_conf_form = SkypeNotificationsOptionsForm
 
-    logger = logging.getLogger('sentry.plugins.sentry_telegram')
+    logger = logging.getLogger('sentry.plugins.sentry_skype')
 
     def is_configured(self, project, **kwargs):
         return bool(self.get_option('api_id', project) and self.get_option('api_secret', project) and self.get_option('receivers', project))
@@ -123,8 +123,8 @@ class SkypeNotificationsPlugin(notify.NotificationPlugin):
     def send_message(self, message, receiver, api_id, api_secret):
         url = 'https://apis.skype.com/v2/conversations/' + receiver + '/activities'
         token = self.get_access_token(client_id=api_id, client_secret=api_secret)
-        headers = {'Authorization':'Bearer ' + token}
-        payload = {'message':{'content': message}}
+        headers = {'Authorization': 'Bearer ' + token}
+        payload = {'message': {'content': message}}
         self.logger.debug('Sending message to %s ' % receiver)
         response = safe_urlopen(
             method='POST',
@@ -145,7 +145,6 @@ class SkypeNotificationsPlugin(notify.NotificationPlugin):
         api_id = self.get_option('api_id', group.project)
         api_secret = self.get_option('api_secret', group.project)
 
-        #url = self.build_url(group.project)
-        #self.logger.debug('Built url: %s' % url)
         for receiver in receivers:
             safe_execute(self.send_message, message, receiver, api_id, api_secret, _with_transaction=False)
+            self.logger.debug('sent message to: %s' % receiver)
