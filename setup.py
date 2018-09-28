@@ -14,6 +14,11 @@ setup(
     author_email='',
     description='Plugin for Sentry which allows sending notification via Skype.',
     license='MIT',
+    entry_points={
+       'sentry.plugins': [
+            'skype = sentry_skype.plugin:SkypeNotificationsPlugin'
+        ],
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
