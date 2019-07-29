@@ -141,8 +141,7 @@ class SkypeNotificationsPlugin(notify.NotificationPlugin):
         data = json.dumps(dict(message=dict(content=message))).encode()
         requests.post(url, headers=headers, data=data)
 
-
-    def notify_users(self, group, event, fail_silently=False):
+    def notify_users(self, group, event, fail_silently=False, **kwargs):
         self.logger.debug('Received notification for event: %s' % event)
         receivers = self.get_receivers(group.project)
         self.logger.debug('for receivers: %s' % ', '.join(receivers or ()))
